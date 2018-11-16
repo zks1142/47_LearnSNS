@@ -1,0 +1,74 @@
+SQL
+
+CRUD処理
+  データ操作のすべて
+
+  ※1．SQLは大文字小文字の判別はない
+  ※2. SQLの構文は大文字、テーブル名やカラム名は小文字で書くのがマナー
+
+Create(作成)
+  INSERT文　INTO テーブル名(カラム名1,カラム名2) VALUES(値1,値2,...)
+
+  INSERT INTO `surver`(`nickname`,`email`,`content`,`phonenumber`) VALUES('seedkun','seed@mail.com','問い合わせ内容','電話番号');
+  INSERT INTO `surver`(`nickname`,`email`,`content`,`phonenumber`) VALUES('seedkun','seed@mail.com','問い合わせ内容','電話番号');
+
+  ※1. テーブル名やカラム名はバックフォートで囲う
+  ※2. 文字列等の値はシングルクォートでまたはダブルクォートで囲う
+
+Read(取得)
+  SELECT文
+  SELECT カラム名1,カラム名2,...FROM テーブル名
+  SELECT `code`,`nickname` FROM `survey`;
+  SELECT * FROM `survey`;
+
+  *1.すべてのカラムを指定する場合はアスタリスク(*)が使える
+
+  文字列
+    完全一致
+      WHERE `カラム名`= 値;
+      WHERE `email` = `okumura@mail.com`;
+
+    部分一致
+      WHERE `カラム名`　LIKE 値;
+      「seed」を含む 
+      WHERE `email` LIKE '%seed%';
+      「seed」で始まる
+      WHERE `email` LIKE 'seed%';
+      「seed」で終わる
+      WHERE `email` LIKE '%seed';
+
+      ※「%」は何かが入ることを意味する
+
+
+    数字
+      WHERE カラム名　比較　値
+        WHERE `code` = 1;
+        WHERE `code` > 2;
+        WHERE `code` >= 3;
+
+    複数条件
+        WHERE 条件1 AND 条件2;//PHPでいう&&
+        WHERE 条件1 OR 条件2;// PHPでいう||
+
+        WHERE `code`> 2 AND `email` LIKE 'seed%';
+        ↑コードの番号が３以上で、かつe-mailがseedで始まる人
+
+
+Update(更新)
+  UPDATE文
+  UPDATE テーブル名 SET カラム名1 = 値1,カラム名2 = 値2,... WHERE 条件;
+
+  UPDATE `survey` SET `nickname` = `seedkun2`
+  WHERE `code` = 1;
+
+  ※WHERE句を忘れるとすべてのレコードが更新されるので注意
+  この場合はWHERE句がないとnicknameがすべてseekun2に変更されてしまう
+
+
+Delete(削除)
+  DELITE文
+  DELITE　FROM テーブル名　WHERE　条件
+  DELITE FROM `survey` WHERE `code` = 1;
+
+  ※WHERE句を忘れるとすべてのレコードが削除されてしまう
+  この場合はsurveyに入ってるすべてのデータが消えてしまう
