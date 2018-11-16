@@ -2,6 +2,7 @@
 session_start();
 require('dbconnect.php');
 //ログインしていない状態でのアクセス禁止
+const CONTENT_PER_PAGE = 5;
 
 if(!isset($_SESSION['47_learnsns']['id'])){
   header('Location: signin.php');
@@ -41,9 +42,38 @@ if(!empty($_POST)){
         $errors['feed'] = 'blank';
     }
 }
+if(isset($_GET['page'])){
+    $page = $_GET['page'];
+}else{
+    $page = 1;
+}
+
+//  -1ページなどの不正な値を渡されたときの対策
+$page = max($page,-1);
+//  feedsテーブルのレコード数を取得する
+//  COUNT()レコードの数がどれくらいあるかを集計するSQLの関数
+$sql = 'SELECT COUNT(*) AS `cnt` FROM `feeds`';
+$stmt = $dbh->prepare($sql);
+$stmt->execute();
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+$cnt = $result['cnt'];
+
+//最後のページが何ページになるかを取得
+//最後のページ=取得したページ数÷１ページ当たりのページ数(この場合は5)
+$last_page = ceil($cnt / CONTENT_PER_PAGE);
+
+echo '<pre>';
+var_dump($last_page);
+echo '</pre>';
+
+
+
+
+
+
 
 //1.投稿情報(ユーザー情報含む)を全て取得
-$sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds` AS `f` LEFT JOIN `users` as `u` ON `f`.`user_id` = `u`.`id` ORDER BY `created` DESC';
+$sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds` AS `f` LEFT JOIN `users` as `u` ON `f`.`user_id` = `u`.`id` ORDER BY `created` DESC LIMIT 5';
 $stmt = $dbh->prepare($sql);
 $stmt->execute($data);
 
@@ -126,8 +156,11 @@ while(true){
                 <?php endforeach; ?>
                 <div aria-label="Page navigation">
                     <ul class="pager">
-                        <li class="previous disabled"><a><span aria-hidden="true">&larr;</span> Newer</a></li>
-                        <li class="next disabled"><a>Older <span aria-hidden="true">&rarr;</span></a></li>
+                        <li class="previous">
+                            <a href="timeline.php?page=<?php echo $page -1; ?>">
+                            <span aria-hidden="true">&larr;</span> Newer</a></li>N
+                        <li class="next">
+                            <a href="timeline.php?page=<?php echo $page +1; ?>">Older<span aria-hidden="true">&rarr;</span></a></li>
                     </ul>
                 </div>
             </div>
