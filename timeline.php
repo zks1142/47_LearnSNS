@@ -49,7 +49,7 @@ if(isset($_GET['page'])){
 }
 
 //  -1ページなどの不正な値を渡されたときの対策
-$page = max($page,-1);
+$page = max($page,1);
 //  feedsテーブルのレコード数を取得する
 //  COUNT()レコードの数がどれくらいあるかを集計するSQLの関数
 $sql = 'SELECT COUNT(*) AS `cnt` FROM `feeds`';
@@ -62,20 +62,16 @@ $cnt = $result['cnt'];
 //最後のページ=取得したページ数÷１ページ当たりのページ数(この場合は5)
 $last_page = ceil($cnt / CONTENT_PER_PAGE);
 
-echo '<pre>';
-var_dump($last_page);
-echo '</pre>';
+//最後のページより大きい値を渡された際の対策
+$page = min($page,$last_page);
 
-
-
-
-
+$start=($page - 1) * CONTENT_PER_PAGE;
 
 
 //1.投稿情報(ユーザー情報含む)を全て取得
-$sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds` AS `f` LEFT JOIN `users` as `u` ON `f`.`user_id` = `u`.`id` ORDER BY `created` DESC LIMIT 5';
+$sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds` AS `f` LEFT JOIN `users` as `u` ON `f`.`user_id` = `u`.`id` ORDER BY `created` DESC LIMIT ' . CONTENT_PER_PAGE . ' OFFSET '. $start;
 $stmt = $dbh->prepare($sql);
-$stmt->execute($data);
+$stmt->execute();
 
 //投稿情報を全てを入れる配列定義
 $feeds = [];
@@ -156,11 +152,34 @@ while(true){
                 <?php endforeach; ?>
                 <div aria-label="Page navigation">
                     <ul class="pager">
-                        <li class="previous">
-                            <a href="timeline.php?page=<?php echo $page -1; ?>">
-                            <span aria-hidden="true">&larr;</span> Newer</a></li>N
-                        <li class="next">
-                            <a href="timeline.php?page=<?php echo $page +1; ?>">Older<span aria-hidden="true">&rarr;</span></a></li>
+                        <?php if($page==1): ?>
+                        <!-- Newer押せないとき-->
+                        <!--最初のページより前は禁止-->
+                            <li class="previous disabled">
+                                <a>
+                                    <span aria-hidden="true">&larr;</span> Newer
+                                </a>
+                            </li>
+                        <?php else: ?>
+                            <li class="previous">
+                                <a href="timeline.php?page=<?php echo $page -1; ?>">
+                                <span aria-hidden="true">&larr;</span> Newer
+                                </a>
+                            </li>
+                        <?php endif;?>
+                        <?php if($page == $last_page): ?>
+                            <li class="next disabled">
+                                <a>Older
+                                <span aria-hidden="true">&rarr;</span>
+                                </a>
+                            </li>
+                        <?php else: ?>
+                            <li class="next">
+                                <a href="timeline.php?page=<?php echo $page +1; ?>">Older
+                                <span aria-hidden="true">&rarr;</span>
+                                </a>
+                            </li>
+                        <?php endif;?>
                     </ul>
                 </div>
             </div>

@@ -1,0 +1,17 @@
+# SQL中級
+
+## LIMIT句
+  LIMIT制限したい数
+  SELECT * FROM `feeds` ORDER BY `created` LIMIT5
+  この制限は上限
+  つまり、その数までなら取得する
+  そもそも３件しかない場合は、その３件を取得する
+
+##OFFSET句
+  OFFSET スキップするレコード数
+
+  SELECT * FROM `feeds` ORDER BY `created`
+  LIMIT 5 OFFSET 0
+
+  OFFSETは取得開始を調整できる
+  何件スキップするか指定する
