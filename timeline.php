@@ -67,11 +67,21 @@ $page = min($page,$last_page);
 
 $start=($page - 1) * CONTENT_PER_PAGE;
 
+if(isset($_GET['search_word'])){
+//検索を行った場合の遷移
+    $sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds` AS `f` LEFT JOIN `users` AS `u` ON `f`.`user_id`=`u`.`id` WHERE `f`.`feed` LIKE "%"?"%" ORDER BY `f`.`created` DESC';
+    $data = [$_GET['search_word']];
+}else{
+    //そのほかの遷移
+    $sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds` AS `f` LEFT JOIN `users` as `u` ON `f`.`user_id` = `u`.`id` ORDER BY `created` DESC LIMIT ' . CONTENT_PER_PAGE . ' OFFSET '. $start;
+    $data = [];
+}
+
 
 //1.投稿情報(ユーザー情報含む)を全て取得
-$sql = 'SELECT `f`.*,`u`.`name`,`u`.`img_name` FROM `feeds` AS `f` LEFT JOIN `users` as `u` ON `f`.`user_id` = `u`.`id` ORDER BY `created` DESC LIMIT ' . CONTENT_PER_PAGE . ' OFFSET '. $start;
+
 $stmt = $dbh->prepare($sql);
-$stmt->execute();
+$stmt->execute($data);
 
 //投稿情報を全てを入れる配列定義
 $feeds = [];
